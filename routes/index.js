@@ -8,3 +8,5 @@ exports.index = function(req, res){
 };
 exports.receive = require('./server-receive')
 exports.send = require('./server-send');
+exports.initialize = require('./initialize');
+exports.list_files = require('./list-files');

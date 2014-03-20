@@ -1,11 +1,9 @@
-
 /**
  * Module dependencies.
  */
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
@@ -36,7 +34,8 @@ mongoose.connect('mongodb://localhost/Storie');
 //Routes
 app.post('/:username/receive', routes.receive);
 app.get('/:username/send/:filename', routes.send);
-
+app.post('/initialize', routes.initialize);
+app.get('/list-files/:username', routes.list_files);
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

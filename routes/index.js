@@ -9,3 +9,4 @@ exports.index = function(req, res){
 
 exports.authenticate = require('./authenticate');
 exports.receive = require('./receive')
+exports.send = require('./send');

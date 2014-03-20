@@ -1,0 +1,2 @@
+curl --data "password=petty" localhost:3000/authenticate/clayton
+curl --form "file=@package.json" --form "key=RANDOM STRING" localhost:3000/clayton/receive

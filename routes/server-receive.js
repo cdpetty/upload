@@ -7,13 +7,12 @@ module.exports = function(req, res){
     if (req.files.file){
       if (req.body.username === 'clayton' && req.body.password === 'petty'){
         
-        var resolved_path = path.resolve('storage ', req.body.username);
-        
+        var resolved_path = path.resolve('storage', req.body.username);
         util.save(req.files.file, resolved_path, req.files.file.name, function(err){
           if (err) res.send(err);
           else res.send('file saved');
         });
-
+        
       }
       else{
         res.send('No file provided');

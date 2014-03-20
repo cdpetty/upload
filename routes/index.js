@@ -6,7 +6,5 @@
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
 };
-
-exports.authenticate = require('./authenticate');
-exports.receive = require('./receive')
-exports.send = require('./send');
+exports.receive = require('./server-receive')
+exports.send = require('./server-send');

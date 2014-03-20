@@ -23,3 +23,17 @@ module.exports.save = function(file, dirname, filename, callback){
     }
   });
 }
+
+/* modules.createDir takes 2 params with a required callback
+ * @dirpath is the directory path the new directory will be located in
+ * @dirname is the intended new directory name
+ * The callback is executed on completion with params err
+ * if no error, err will be null
+ */
+module.exports.createDir = function(dirpath, dirname, callback){
+  var folder_path = path.join(dirpath, dirname);
+    fs.mkdir(folder_path, function(err){
+      if (err) callback(err);
+      else callback();
+    });
+};

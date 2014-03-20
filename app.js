@@ -34,9 +34,9 @@ if ('development' == app.get('env')) {
 mongoose.connect('mongodb://localhost/Storie');
 
 //Routes
-app.post('/authenticate/:username', routes.authenticate);
 app.post('/:username/receive', routes.receive);
 app.get('/:username/send/:filename', routes.send);
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

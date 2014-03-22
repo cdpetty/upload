@@ -5,12 +5,13 @@ module.exports = function(req, res){
     if (err) res.send(err);
     else{
       storage.find({ user: found._id }, function(err, found){
+        console.log(found);
         if (err) res.send(err);
         else{
           var founded = ''
-          for (var f in found){
+          found.forEach(function(f){
             founded += f.filename;
-          }
+          });
           res.send(founded);
         }
       });

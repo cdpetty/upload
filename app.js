@@ -36,6 +36,8 @@ app.post('/:username/receive', routes.receive);
 app.get('/:username/send/:filename', routes.send);
 app.post('/initialize', routes.initialize);
 app.get('/list-files/:username', routes.list_files);
+
+//Create Server
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

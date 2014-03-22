@@ -29,7 +29,7 @@ if ('development' == app.get('env')) {
 }
 
 //Mongoose
-mongoose.connect('mongodb://localhost/Storie');
+mongoose.connect('mongodb://localhost/One');
 
 //Routes
 app.post('/:username/receive', routes.receive);

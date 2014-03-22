@@ -9,7 +9,7 @@ module.exports = function(req, res){
     //Download the file
     res.download(path.resolve('storage', req.params.username, req.params.filename), function(err){
       if (err) res.send('error downloading your file: ' + err);
-      else res.send('File Downloaded');
+      else console.log('Error downloading file');
     });
   }
 };

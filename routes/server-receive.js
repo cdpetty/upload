@@ -13,6 +13,7 @@ module.exports = function(req, res){
   
   //Check for required username and password
   if (req.body.username && req.body.password){
+    
     //check for file to be uploaded
     if (req.files.file){
       

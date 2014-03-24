@@ -15,8 +15,8 @@ module.exports = function(req, res){
     
     //Create new user in database
     var new_user = new users();
-    new_user.username = req.body.username
-      .password = req.body.password;
+    new_user.username = req.body.username;
+    new_user.password = req.body.password;
     
     //Save new user
     new_user.save(function(err){

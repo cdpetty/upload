@@ -28,7 +28,7 @@ module.exports = function(req, res){
             //Create new submission data
             var new_file = new storage();
             new_file.filename = req.files.file.name;
-            new_file.date = new Date();
+            new_file.date = new Date(); 
             new_file.user = found._id;
             
             //Save the new submission data

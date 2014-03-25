@@ -32,8 +32,8 @@ if ('development' == app.get('env')) {
 mongoose.connect('mongodb://localhost/One');
 
 //Routes
-app.post('/:username/receive', routes.receive);
-app.get('/:username/send/:filename', routes.send);
+app.post('/receive/:username', routes.receive);
+app.get('/send/:username/:filename', routes.send);
 app.post('/initialize', routes.initialize);
 app.get('/list-files/:username', routes.list_files);
 

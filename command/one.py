@@ -12,7 +12,7 @@
    ############################                       
 
 from optparse import OptionParser, OptionGroup
-import signal, sys
+import signal, sys, requests
 
 SUB_COMMANDS = ['push', 'pull', 'list']
 NEED_INPUT_STRING = ['push', 'pull']
@@ -69,6 +69,24 @@ def build_option_parser():
 
   return parser
 
+def upload(filenames): 
+  url = "http://localhost:3000"
+  route = "/receive/clayton"
+  data = {'username':'clayton', 'password':'petty'}
+  for file in filenames:
+    files = {'file':open(file, 'r')}
+    r = requests.post(url + route, files=files, data=data)
+    print r.text
+
+def download(filenames):
+  url = "http://localhost:3000"
+  for filename in filenames:
+    route = "/send/clayton/" + filename
+    file = requests.get(url + route).text
+    f = open(filename, 'w')
+    f.write(file)
+    f.close()
+
 def main():
   
   (options, args) = build_option_parser().parse_args()
@@ -79,6 +97,14 @@ def main():
     die('No file selected. Must select at least one file')
   elif args[0] not in SUB_COMMANDS:
     die('Invalid sub-command chosen: ' + args[0])
+  
+  sub_command = args[0]
+  
+  if sub_command == 'pull':
+    download(args[1:])
+  elif sub_command == 'push':
+    upload(args[1:])
+  
 
   
 if __name__ =='__main__':

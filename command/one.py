@@ -114,7 +114,8 @@ def pull(filenames):
   for filename in filenames:
     route = '/'.join(['/send', username, filename])
     file = requests.get(URL + route).text
-    with open(filename, 'w') as f:
+    print file[0:15]
+    with open(filename, 'wb') as f:
       f.write(file)
 
 def main():

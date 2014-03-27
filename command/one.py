@@ -15,7 +15,7 @@ from optparse import OptionParser, OptionGroup
 from os import path
 import signal, sys, requests, getpass
 
-SUB_COMMANDS = ['push', 'pull', 'list', 'auth']
+SUB_COMMANDS = ['push', 'pull', 'list', 'init']
 NEED_INPUT_STRING = ['push', 'pull']
 URL = 'http://localhost:3000'
 
@@ -73,9 +73,9 @@ def obtain_user_info():
       auth_file = open(p, 'r')
       username = auth_file.readline().strip()
       password = auth_file.readline()
-    return (username, password)
+    return username, password
   else:
-    initialize()
+    die('Run "one init" to sign into user')
   die('done')
     
 def initialize():
@@ -87,25 +87,35 @@ def initialize():
   p = path.expanduser('~/.one')
   with open(p, 'w') as auth_file:
     auth_file.write(username + '\n' + password)
-  
   log('Consider yourself: Signed In')
   sys.exit(0)
 
-def upload(filenames): 
-  route = "/receive/clayton"
-  data = {'username':'clayton', 'password':'petty'}
-  for file in filenames:
-    files = {'file':open(file, 'r')}
-    r = requests.post(URL + route, files=files, data=data)
-    print r.text
-
-def download(filenames):
+def push(filenames): 
+  # Get auth
+  username, password = obtain_user_info()
+  route = '/receive/' + username
+  data = { 'password': password}
+  
+  # Upload Files
   for filename in filenames:
-    route = "/send/clayton/" + filename
+    #with open(filename, 'r') as f:
+    f = open(filename, 'r')
+    files = { 'file': f }
+    r = requests.post(URL + route, files=files, data=data)
+    
+
+def pull(filenames):
+  
+  # Get username
+  username, password = obtain_user_info()
+  del(password)
+  
+  # Download Files
+  for filename in filenames:
+    route = '/'.join(['/send', username, filename])
     file = requests.get(URL + route).text
-    f = open(filename, 'w')
-    f.write(file)
-    f.close()
+    with open(filename, 'w') as f:
+      f.write(file)
 
 def main():
   
@@ -122,13 +132,13 @@ def main():
   files = args[1:]
   
   if sub_command == 'pull':
-    download(args[1:])
+    pull(files)
   elif sub_command == 'push':
-    upload(args[1:])
+    push(files)
   elif sub_command == 'init':
-    obtain_user_info()
+    initialize()
   
 
-  
+
 if __name__ =='__main__':
   main()

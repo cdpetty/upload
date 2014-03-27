@@ -9,7 +9,7 @@ module.exports = function(req, res){
   /* Retreive a file from the user, save the filename in the database, and save the file in the user's folder.
      Verifies user information from form data */
   
-  console.log('Attempted upload from username:', req.body.username, 'and password', req.body.password);
+  console.log('Attempted upload from username:', req.params.username, 'and password', req.body.password);
   
   //Check for required username and password
   if (req.params.username && req.body.password){
@@ -34,7 +34,7 @@ module.exports = function(req, res){
 
                 
               //Save and store the file
-              var resolved_path = path.resolve('storage', req.body.username);
+              var resolved_path = path.resolve('storage', req.params.username);
               util.save(req.files.file, resolved_path, req.files.file.name, function(err){
                 if (err) res.send(err);
                 else{

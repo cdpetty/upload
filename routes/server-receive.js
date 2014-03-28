@@ -2,7 +2,28 @@
 var util = require('../modules/utilities'),
     path = require('path'),
     storage = require('../models/storage'),
-    users = require('../models/users');
+    users = require('../models/users'),
+    db_util = require('../modules/db_util');
+
+var newUserFile = function(file, username, _id, callback){
+  
+  //Create new submission data
+  var new_file = new storage();
+  new_file.filename = file.name;
+  new_file.date = new Date(); 
+  new_file.user = _id;
+  
+  //Save and store the file
+  var resolved_path = path.resolve('storage', username);
+  util.save(file, resolved_path, file.name, function(err){
+    if (err) callback(err);
+    else{
+      //Save the new submission data
+      new_file.save(callback(err));
+    }
+  });  
+};
+
 
 //Route
 module.exports = function(req, res){
@@ -17,38 +38,25 @@ module.exports = function(req, res){
     //check for file to be uploaded
     if (req.files.file){
       
-      //find the user requesting to upload
-      users.find({ username: req.params.username, password: req.body.password }, function(err, found){
+      //Check if the user exists
+      db_util.doesUserExist(req.params.username, req.body.password, true, function(err, user){
         if (err) res.send(err);
-        else{
-          
-          //Ensure the user exists
-          if (found){
+        else if (user){
+          console.log(user);
+          //Check if the file already exists
+          db_util.doesFileExist(req.files.file.name, user._id, function(err, exists){
             
-            //Create new submission data
-            var new_file = new storage();
-            new_file.filename = req.files.file.name;
-            new_file.date = new Date(); 
-            new_file.user = found._id;
-            
-
-                
-              //Save and store the file
-              var resolved_path = path.resolve('storage', req.params.username);
-              util.save(req.files.file, resolved_path, req.files.file.name, function(err){
-                if (err) res.send(err);
-                else{
-                  //Save the new submission data
-                  new_file.save(function(err){
-                    if (err) res.send(err);
-                    else{
-                      res.send('File saved');
-                    }
-                  });
-                }
-              });
-          }
+            //send correct response
+            console.log('Exists:', exists);
+            if (err) res.send(err);
+            else if (exists) res.send('File already Exists');
+            else newUserFile(req.files.file, req.params.username, user._id, function(err){
+              if (err) res.send(err);
+              else res.send('Successful upload');
+            });
+          });
         }
+        else res.send('User does not exist');
       });
     }
     else{
@@ -59,3 +67,5 @@ module.exports = function(req, res){
     res.send('Incorrect username or password');
   }
 };
+
+

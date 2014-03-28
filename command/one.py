@@ -15,16 +15,20 @@ from optparse import OptionParser, OptionGroup
 from os import path
 import signal, sys, requests, getpass
 
-SUB_COMMANDS = ['push', 'pull', 'list', 'init']
-NEED_INPUT_STRING = ['push', 'pull']
+SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create']
+NEED_INPUT_STRING = ['push', 'pull', 'create']
 URL = 'http://localhost:3000'
 
 def log(statement):
-  sys.stdout.write(statement)
+  sys.stdout.write(statement + '\n')
 
 def die(statement):
   sys.stderr.write('ERROR: ' + statement + '\n')
   sys.exit(1)
+
+def end(statement):
+  log(statement + '\n')
+  sys.exit(0)
 
 def build_option_parser():
   
@@ -76,7 +80,6 @@ def obtain_user_info():
     return username, password
   else:
     die('Run "one init" to sign into user')
-  die('done')
     
 def initialize():
   # create new user
@@ -90,11 +93,21 @@ def initialize():
   log('Consider yourself: Signed In')
   sys.exit(0)
 
+def list_files():
+  username = obtain_user_info()[0]
+  route = '/list-files/' + username
+  r = requests.get(URL + route)
+  if r.text:
+    end('Files contained: ' + r.text)
+  else: 
+    end('No Stored Files')
+  
+
 def push(filenames): 
   # Get auth
   username, password = obtain_user_info()
   route = '/receive/' + username
-  data = { 'password': password}
+  data = { 'password': password }
   
   # Upload Files
   for filename in filenames:
@@ -102,21 +115,27 @@ def push(filenames):
     f = open(filename, 'r')
     files = { 'file': f }
     r = requests.post(URL + route, files=files, data=data)
+    log(r.text)
     
 
 def pull(filenames):
   
   # Get username
-  username, password = obtain_user_info()
-  del(password)
+  username  = obtain_user_info()[0]
   
   # Download Files
   for filename in filenames:
     route = '/'.join(['/send', username, filename])
     file = requests.get(URL + route).text
-    print file[0:15]
-    with open(filename, 'wb') as f:
+    with open(filename, 'w') as f:
       f.write(file)
+
+def create_user(username, password):
+  #log('Username:' + username + ' Password: ' + password)
+  route = '/initialize'
+  data = { 'username': username, 'password': password } 
+  r = requests.post(URL + route, data=data)
+  end(r.text)
 
 def main():
   
@@ -138,6 +157,10 @@ def main():
     push(files)
   elif sub_command == 'init':
     initialize()
+  elif sub_command == 'list':
+    list_files()
+  elif sub_command == 'create':
+    create_user(files[0], files[1])
   
 
 

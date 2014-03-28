@@ -5,7 +5,8 @@ var mongoose = require('mongoose'),
 var storageSchema = Schema({
     filename: String,
     date: Date,
-    user: ObjectId
+    user: ObjectId,
+    size: Number
 });
 
 var storage = mongoose.model('storage', storageSchema);

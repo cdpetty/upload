@@ -19,7 +19,7 @@ module.exports = function(req, res){
           //Compile the list of files
           var founded = ''
           found.forEach(function(f){
-            founded += f.filename;
+            founded += f.filename + '\n'
           });
           
           //send information

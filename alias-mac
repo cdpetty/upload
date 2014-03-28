@@ -1,0 +1,1 @@
+alias one="python ~/Documents/Git/One/command/one.py $@"

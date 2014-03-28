@@ -24,6 +24,19 @@ module.exports.save = function(file, dirname, filename, callback){
   });
 }
 
+module.exports.delete = function(dirname, filename, callback){
+  fs.exists(path.join(dirname, filename), function(exists){
+    if (!exists) callback ("File does not exist");
+    else{
+      fs.unlink(path.join(dirname, filename), function(err){
+        if (err) callback(err);
+        else callback(err);
+      });
+    }
+  });
+};
+
+
 /* modules.createDir takes 2 params with a required callback
  * @dirpath is the directory path the new directory will be located in
  * @dirname is the intended new directory name

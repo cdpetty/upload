@@ -15,8 +15,8 @@ from optparse import OptionParser, OptionGroup
 from os import path
 import signal, sys, requests, getpass
 
-SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create']
-NEED_INPUT_STRING = ['push', 'pull', 'create']
+SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'del']
+NEED_INPUT_STRING = ['push', 'pull', 'create', 'del']
 URL = 'http://localhost:3000'
 
 def log(statement):
@@ -106,8 +106,8 @@ def list_files():
 def push(filenames): 
   # Get auth
   username, password = obtain_user_info()
-  route = '/receive/' + username
-  data = { 'password': password }
+  route = '/upload'
+  data = { 'username': username, 'password': password }
   
   # Upload Files
   for filename in filenames:
@@ -125,18 +125,28 @@ def pull(filenames):
   
   # Download Files
   for filename in filenames:
-    route = '/'.join(['/send', username, filename])
+    route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text
     with open(filename, 'w') as f:
       f.write(file)
 
 def create_user(username, password):
-  #log('Username:' + username + ' Password: ' + password)
   route = '/initialize'
   data = { 'username': username, 'password': password } 
   r = requests.post(URL + route, data=data)
   end(r.text)
 
+def delete(filenames):
+  route = '/delete'
+  username, password = obtain_user_info()
+  data = { 'username': username, 'password': password }
+  
+  for filename in filenames:
+    data['filename'] = filename
+    r = requests.post(URL + route, data=data);
+    log(r.text)
+  end('Deleted')
+  
 def main():
   
   (options, args) = build_option_parser().parse_args()
@@ -161,6 +171,8 @@ def main():
     list_files()
   elif sub_command == 'create':
     create_user(files[0], files[1])
+  elif sub_command == 'del':
+    delete(files)
   
 
 

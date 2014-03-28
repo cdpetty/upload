@@ -32,11 +32,11 @@ if ('development' == app.get('env')) {
 mongoose.connect('mongodb://localhost/One');
 
 //Routes
-app.post('/receive/:username', routes.receive);
-app.get('/send/:username/:filename', routes.send);
+app.post('/upload', routes.upload);
+app.get('/download/:username/:filename', routes.download);
 app.post('/initialize', routes.initialize);
 app.get('/list-files/:username', routes.list_files);
-
+app.post('/delete', routes.delete);
 //Create Server
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

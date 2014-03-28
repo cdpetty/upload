@@ -24,7 +24,7 @@ var createNewUser = function(username, password, callback){
         else{
           
           //Create new user directory
-          util.createDir(path.resolve('storage'), username, callback(err));
+          util.createDir(path.resolve('storage'), username, callback);
         }
       });
     }

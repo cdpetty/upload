@@ -98,7 +98,7 @@ def list_files():
   route = '/list-files/' + username
   r = requests.get(URL + route)
   if r.text:
-    end('Files contained: ' + r.text)
+    end(r.text*100)
   else: 
     end('No Stored Files')
   

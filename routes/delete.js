@@ -36,7 +36,7 @@ module.exports = function(req, res){
       else if (user){
         //Check if the file already exists
         db_util.doesFileExist(req.body.filename, user._id, function(err, exists){
-          
+
           //send correct response
           if (err) res.send(err);
           else if (!exists) res.send('File does not Exist');

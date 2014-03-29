@@ -117,7 +117,7 @@ def list_files():
   route = '/list-files/' + username
   r = requests.get(URL + route)
   if r.text:
-    end(r.text*100)
+    end(r.text)
   else: 
     end('No Stored Files')
 ######################################
@@ -149,7 +149,7 @@ def pull(filenames, options):
   for filename in filenames:
     route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text
-    with open(filename, 'w') as f:
+    with open(filename, 'wb') as f:
       f.write(file)
 ######################################
 

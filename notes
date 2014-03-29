@@ -1,3 +1,3 @@
-curl --form "file=@testfile.asdf" --form "username=clayton" --form "password=petty" localhost:3000/clayton/receive
-
-curl -O localhost:3000/clayton/send/testfile.asdf
+Upload folders
+Validate options (tac stuff) per sub_command
+Figure out how to treat errors

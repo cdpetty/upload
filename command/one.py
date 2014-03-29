@@ -19,6 +19,7 @@ SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'del']
 NEED_INPUT_STRING = ['push', 'pull', 'create', 'del']
 URL = 'http://localhost:3000'
 
+######################################
 def log(statement):
   sys.stdout.write(statement + '\n')
 
@@ -29,7 +30,11 @@ def die(statement):
 def end(statement):
   log(statement + '\n')
   sys.exit(0)
+######################################
 
+
+
+######################################
 def build_option_parser():
   
   # Create option parser and Option Groups
@@ -66,7 +71,11 @@ def build_option_parser():
   parser.add_option_group(pull_group)
 
   return parser
+######################################
 
+
+
+######################################
 def obtain_user_info():
   # Check if authentication file exists
   p = path.expanduser('~/.one')
@@ -92,7 +101,17 @@ def initialize():
     auth_file.write(username + '\n' + password)
   log('Consider yourself: Signed In')
   sys.exit(0)
+  
+def create_user(username, password):
+  route = '/initialize'
+  data = { 'username': username, 'password': password } 
+  r = requests.post(URL + route, data=data)
+  end(r.text)
+######################################
 
+
+
+######################################
 def list_files():
   username = obtain_user_info()[0]
   route = '/list-files/' + username
@@ -101,9 +120,12 @@ def list_files():
     end(r.text*100)
   else: 
     end('No Stored Files')
-  
+######################################
 
-def push(filenames): 
+
+
+######################################
+def push(filenames, options): 
   # Get auth
   username, password = obtain_user_info()
   route = '/upload'
@@ -118,7 +140,7 @@ def push(filenames):
     log(r.text)
     
 
-def pull(filenames):
+def pull(filenames, options):
   
   # Get username
   username  = obtain_user_info()[0]
@@ -129,13 +151,11 @@ def pull(filenames):
     file = requests.get(URL + route).text
     with open(filename, 'w') as f:
       f.write(file)
+######################################
 
-def create_user(username, password):
-  route = '/initialize'
-  data = { 'username': username, 'password': password } 
-  r = requests.post(URL + route, data=data)
-  end(r.text)
 
+
+######################################
 def delete(filenames):
   route = '/delete'
   username, password = obtain_user_info()
@@ -146,7 +166,11 @@ def delete(filenames):
     r = requests.post(URL + route, data=data);
     log(r.text)
   end('Deleted')
-  
+######################################
+
+
+
+######################################
 def main():
   
   (options, args) = build_option_parser().parse_args()
@@ -162,9 +186,9 @@ def main():
   files = args[1:]
   
   if sub_command == 'pull':
-    pull(files)
+    pull(files, options)
   elif sub_command == 'push':
-    push(files)
+    push(files, options)
   elif sub_command == 'init':
     initialize()
   elif sub_command == 'list':
@@ -178,3 +202,4 @@ def main():
 
 if __name__ =='__main__':
   main()
+######################################

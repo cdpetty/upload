@@ -150,7 +150,8 @@ def pull(filenames, options):
     route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text
     with open(filename, 'wb') as f:
-      f.write(file)
+      newFileByteArray = bytearray(file, 'utf-8')
+      f.write(newFileByteArray)
 ######################################
 
 

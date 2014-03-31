@@ -126,6 +126,7 @@ def list_files():
 
 ######################################
 def push(filenames, options): 
+
   # Get auth
   username, password = obtain_user_info()
   route = '/upload'
@@ -149,9 +150,13 @@ def pull(filenames, options):
   for filename in filenames:
     route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text
-    with open(filename, 'wb') as f:
-      newFileByteArray = bytearray(file, 'utf-8')
-      f.write(newFileByteArray)
+    if options['stdout']:
+      log(file)
+    else: 
+      with open(filename, 'wb') as f:
+        #newFileByteArray = bytearray(file, 'utf-8')
+        #f.write(newFileByteArray)
+        f.write(file)
 ######################################
 
 
@@ -175,7 +180,9 @@ def delete(filenames):
 def main():
   
   (options, args) = build_option_parser().parse_args()
-  
+  print options
+  print args
+  print options['stdout']
   if len(args) == 0:
     die('No sub-command chosen')
   elif len(args) == 1 and args[0] in NEED_INPUT_STRING:

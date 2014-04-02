@@ -37,6 +37,7 @@ app.get('/download/:username/:filename', routes.download);
 app.post('/initialize', routes.initialize);
 app.get('/list-files/:username', routes.list_files);
 app.post('/delete', routes.delete);
+
 //Create Server
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

@@ -13,11 +13,15 @@
 
 from optparse import OptionParser, OptionGroup
 from os import path
-import signal, sys, requests, getpass, base64
+import signal, sys, requests, getpass
 
 SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'del']
 NEED_INPUT_STRING = ['push', 'pull', 'create', 'del']
 URL = 'http://localhost:3000'
+STDOUT = False
+QUIET = False
+RECURSE = False
+DPATH = '.'
 
 ######################################
 def log(statement):
@@ -125,7 +129,7 @@ def list_files():
 
 
 ######################################
-def push(filenames, options): 
+def push(filenames): 
 
   # Get auth
   username, password = obtain_user_info()
@@ -141,7 +145,7 @@ def push(filenames, options):
     log(r.text)
     
 
-def pull(filenames, options):
+def pull(filenames):
   
   # Get username
   username  = obtain_user_info()[0]
@@ -149,15 +153,22 @@ def pull(filenames, options):
   # Download Files
   for filename in filenames:
     route = '/'.join(['/download', username, filename])
-    file = base64.b64encode(requests.get(URL + route).text)
-    #if options['stdout']:
-    #  log(file)
-    #else: 
-    with open(filename, 'wb') as f:
-      #newFileByteArray = bytearray(file, 'utf-8')
-      #f.write(newFileByteArray)
-      
-      f.write(file)
+    file = requests.get(URL + route).text
+    
+    if STDOUT:
+      log(file)
+    else: 
+      if DPATH != '.':
+        full_path = DPATH.replace('~', path.expanduser('~')).replace('..', path.abspath('..')).replace('./', path.abspath('.'))
+        if DPATH[-1] == '/':
+          full_path += filename
+        else:
+          full_path += '/' + filename
+      else:
+        full_path = path.abspath('.') + '/' + filename
+      log('FULL PATH: ' + full_path)
+      with open(full_path, 'wb') as f:
+        f.write(file)
 ######################################
 
 
@@ -180,24 +191,28 @@ def delete(filenames):
 ######################################
 def main():
   
+  global STDOUT, QUIET, RECURSE, DPATH
   (options, args) = build_option_parser().parse_args()
-  #print options
-  #print args
-  #print options['stdout']
+
   if len(args) == 0:
     die('No sub-command chosen')
   elif len(args) == 1 and args[0] in NEED_INPUT_STRING:
     die('No file selected. Must select at least one file')
   elif args[0] not in SUB_COMMANDS:
-    die('Invalid sub-command chosen: ' + args[0])
+    die('Invalid sub-command chosen - ' + args[0])
+  
   
   sub_command = args[0]
   files = args[1:]
+  STDOUT = options.stdout
+  QUIET = options.quiet
+  RECURSE = options.recurse
+  DPATH = options.dpath
   
   if sub_command == 'pull':
-    pull(files, options)
+    pull(files)
   elif sub_command == 'push':
-    push(files, options)
+    push(files)
   elif sub_command == 'init':
     initialize()
   elif sub_command == 'list':

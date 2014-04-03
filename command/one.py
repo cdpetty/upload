@@ -18,6 +18,7 @@ import signal, sys, requests, getpass
 SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'del']
 NEED_INPUT_STRING = ['push', 'pull', 'create', 'del']
 URL = 'http://localhost:3000'
+
 STDOUT = False
 QUIET = False
 RECURSE = False
@@ -25,7 +26,9 @@ DPATH = '.'
 
 ######################################
 def log(statement):
-  sys.stdout.write(statement + '\n')
+  if not QUIET:
+    sys.stdout.write(statement)
+    sys.stdout.flush()
 
 def die(statement):
   sys.stderr.write('ERROR: ' + statement + '\n')
@@ -34,6 +37,18 @@ def die(statement):
 def end(statement):
   log(statement + '\n')
   sys.exit(0)
+
+def get_full_path(filename):
+  full_path = ''
+  if DPATH != '.':
+    full_path = DPATH.replace('~', path.expanduser('~')).replace('..', path.abspath('..')).replace('./', path.abspath('.'))
+    if DPATH[-1] == '/':
+      full_path += filename
+    else:
+      full_path += '/' + filename
+  else:
+    full_path = path.abspath('.') + '/' + filename
+  return full_path  
 ######################################
 
 
@@ -97,7 +112,7 @@ def obtain_user_info():
 def initialize():
   # create new user
   username = raw_input('If you have an account already, input your username: ')
-  password = getpass.getpass('Input your password (note: no text will appear on screen): ')
+  password = getpass.getpass('Input your password (note that no text will appear on screen): ')
   
   # Create authentication file
   p = path.expanduser('~/.one')
@@ -138,11 +153,14 @@ def push(filenames):
   
   # Upload Files
   for filename in filenames:
+    log('Uploading File: ' + filename + '.... ')
     #with open(filename, 'r') as f:
+    
     f = open(filename, 'r')
     files = { 'file': f }
     r = requests.post(URL + route, files=files, data=data)
-    log(r.text)
+    
+    log('Upload Complete\n')
     
 
 def pull(filenames):
@@ -152,23 +170,17 @@ def pull(filenames):
   
   # Download Files
   for filename in filenames:
+    log('Downloading file: ' + filename + '..... ')
     route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text
     
     if STDOUT:
       log(file)
     else: 
-      if DPATH != '.':
-        full_path = DPATH.replace('~', path.expanduser('~')).replace('..', path.abspath('..')).replace('./', path.abspath('.'))
-        if DPATH[-1] == '/':
-          full_path += filename
-        else:
-          full_path += '/' + filename
-      else:
-        full_path = path.abspath('.') + '/' + filename
-      log('FULL PATH: ' + full_path)
+      full_path = get_full_path(filename)
       with open(full_path, 'wb') as f:
         f.write(file)
+      log('Download Complete\n')
 ######################################
 
 
@@ -182,8 +194,8 @@ def delete(filenames):
   for filename in filenames:
     data['filename'] = filename
     r = requests.post(URL + route, data=data);
-    log(r.text)
-  end('Deleted')
+    log('File: ' + filename + ' deleted\n')
+    
 ######################################
 
 
@@ -224,6 +236,10 @@ def main():
   
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
+  def sigint_handler(signal, frame):
+    sys.stdout.write('\nCaught Control-C. Exiting now.\n')
+    sys.exit(130)
+  signal.signal(signal.SIGINT, sigint_handler)
   main()
 ######################################

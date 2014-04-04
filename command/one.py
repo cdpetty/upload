@@ -39,15 +39,14 @@ def end(statement):
   sys.exit(0)
 
 def get_full_path(filename):
-  full_path = ''
-  if DPATH != '.':
-    full_path = DPATH.replace('~', path.expanduser('~')).replace('..', path.abspath('..')).replace('./', path.abspath('.'))
-    if DPATH[-1] == '/':
-      full_path += filename
-    else:
-      full_path += '/' + filename
+  full_path = path.expanduser(DPATH)
+  log('After expanduser: ' + full_path)
+  full_path = path.abspath(full_path)
+  log('After abspath: ' + full_path)
+  if DPATH[-1] == '/':
+    full_path += filename
   else:
-    full_path = path.abspath('.') + '/' + filename
+    full_path += '/' + filename
   return full_path  
 ######################################
 
@@ -154,9 +153,12 @@ def push(filenames):
   # Upload Files
   for filename in filenames:
     log('Uploading File: ' + filename + '.... ')
-    #with open(filename, 'r') as f:
     
-    f = open(filename, 'r')
+    full_path = path.expanduser(path.abspath(filename))
+    f = open(full_path, 'r')
+
+    data['path'] = full_path[:full_path.rfind('/')]
+    log('PATH: ' + data['path'])
     files = { 'file': f }
     r = requests.post(URL + route, files=files, data=data)
     
@@ -178,6 +180,7 @@ def pull(filenames):
       log(file)
     else: 
       full_path = get_full_path(filename)
+      log('FULL PATH: ' + full_path)
       with open(full_path, 'wb') as f:
         f.write(file)
       log('Download Complete\n')

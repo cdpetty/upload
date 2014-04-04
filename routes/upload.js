@@ -5,13 +5,14 @@ var util = require('../modules/utilities'),
     users = require('../models/users'),
     db_util = require('../modules/db_util');
 
-var newUserFile = function(file, username, _id, callback){
+var newUserFile = function(file, username, _id, file_path, callback){
   
   //Create new submission data
   var new_file = new storage();
   new_file.filename = file.name;
   new_file.date = new Date(); 
   new_file.user = _id;
+  new_file.path = file_path.split('/').filter(function(n){return n!=''});
   
   //Save and store the file
   var resolved_path = path.resolve('storage', username);
@@ -36,7 +37,7 @@ module.exports = function(req, res){
   if (req.body.username && req.body.password){
     
     //check for file to be uploaded
-    if (req.files.file){
+    if (req.files.file && req.body.path){
       
       //Check if the user exists
       db_util.doesUserExist(req.body.username, req.body.password, true, function(err, user){
@@ -50,7 +51,7 @@ module.exports = function(req, res){
             console.log('Exists:', exists);
             if (err) res.send(err);
             else if (exists) res.send('File already Exists');
-            else newUserFile(req.files.file, req.body.username, user._id, function(err){
+            else newUserFile(req.files.file, req.body.username, user._id, req.body.path, function(err){
               if (err) res.send(err);
               else res.send('Successful upload');
             });

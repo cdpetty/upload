@@ -6,7 +6,8 @@ var storageSchema = Schema({
     filename: String,
     date: Date,
     user: ObjectId,
-    size: Number
+    size: Number,
+    path: [String]
 });
 
 var storage = mongoose.model('storage', storageSchema);

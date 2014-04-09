@@ -22,7 +22,7 @@ app.use(express.methodOverride());
 app.use(express.bodyParser());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'storage')));
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());

@@ -148,12 +148,7 @@ def push(filenames):
   data = { 'username': username, 'password': password }
   
   def recursive_upload(p):
-    log('\n\nPATH: ' + p + '\n\n')
-    if path.isdir(p):
-      p, dirnames, filenames = next(walk(p))
-    else:
-      dirnames = []
-      filenames = [p]
+    p, dirnames, filenames = next(walk(p))
     #log('\nPATH: ' + str(p) + ' Dirnames: ' + str(dirnames) + ' filenames: ' + str(filenames) + '\n')
     for directory in dirnames:
       recursive_upload(path.join(p, directory))

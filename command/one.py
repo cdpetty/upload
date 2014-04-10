@@ -39,11 +39,7 @@ def end(statement):
   sys.exit(0)
 
 def get_full_path(name):
-  full_path = path.expanduser(DPATH)
-  log('After expanduser: ' + full_path)
-  full_path = path.abspath(full_path)
-  log('After abspath: ' + full_path)
-  return path.join(full_path, name)
+  return path.join(path.abspath(path.expanduser(DPATH)), name)
   
 ######################################
 
@@ -141,7 +137,6 @@ def list_files():
 
 ######################################
 def push(filenames): 
-  
   # Get auth
   username, password = obtain_user_info()
   route = '/upload'
@@ -154,10 +149,8 @@ def push(filenames):
     else:
       dirnames = []
       filenames = [p]
-    #log('\nPATH: ' + str(p) + ' Dirnames: ' + str(dirnames) + ' filenames: ' + str(filenames) + '\n')
     for directory in dirnames:
       recursive_upload(path.join(p, directory))
-      
     for filename in filenames:
       full_path = path.join(p, filename)
       f = open(full_path, 'r')
@@ -167,16 +160,12 @@ def push(filenames):
       
       files = { 'file': f }
       r = requests.post(URL + route, files=files, data=data)
-    
     log('Upload Complete\n')
-  # Upload Files
+    
   for name in filenames:
-    
     log('Uploading File: ' + name + '.... ')
-    
     full_path = get_full_path(name)
     recursive_upload(full_path)
-    
     log('\nDONE\n')
   
 
@@ -186,7 +175,7 @@ def pull(filenames):
   username  = obtain_user_info()[0]
   
   # Download Files
-  for filename in filenames:
+  for name in filenames:
     log('Downloading file: ' + filename + '..... ')
     route = '/'.join(['/download', username, filename])
     file = requests.get(URL + route).text

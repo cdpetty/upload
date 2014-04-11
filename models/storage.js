@@ -7,7 +7,8 @@ var storageSchema = Schema({
     date: Date,
     user: ObjectId,
     size: Number,
-    path: [String]
+    path: [String],
+    dir: Boolean
 });
 
 var storage = mongoose.model('storage', storageSchema);

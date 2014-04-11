@@ -13,6 +13,8 @@ var newUserFile = function(file, username, _id, file_path, callback){
   new_file.date = new Date(); 
   new_file.user = _id;
   new_file.path = file_path.split('/').filter(function(n){return n!=''});
+  var extension = file.name.split('.')[1];
+  new_file.dir = (extension === 'zip' || extension === 'tar') ? true : false;
   
   //Save and store the file
   var resolved_path = path.resolve('storage', username);

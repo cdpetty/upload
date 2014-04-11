@@ -20,13 +20,32 @@ module.exports = function(req, res){
         else{
           
           //Compile the list of files
-          var founded = ''
+          var dirs = [];
+          var files = [];
           found.forEach(function(f){
-            founded += f.filename + '\n'
+            if (f.dir)
+              dirs.push(f.filename);
+            else
+              files.push(f.filename);
           });
           
+          var list = '';
+          if (files.length !== 0){
+            list = 'Files:\n';
+            files.forEach(function(one){
+              list += '  ' + one + '\n';
+            });
+            list += '\n';
+          }
+          if (dirs.length !== 0){
+            list += 'Directories:\n';
+            dirs.forEach(function(one){
+              list += '  ' + one.split('.')[0] + '\n'
+            });
+          }
+          
           //send information
-          res.send(founded.substring(0, founded.length - 1));
+          res.send(list.substring(0, list.length - 1));
         }
       });
     }

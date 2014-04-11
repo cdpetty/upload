@@ -1,8 +1,9 @@
 import sys
 
-def log(statement):
+def log(*statements):
   ##if not QUIET:
-  sys.stdout.write(statement)
+  phrase = ' '.join(map(str, statements))
+  sys.stdout.write(phrase)
   sys.stdout.flush()
 
 def die(statement):

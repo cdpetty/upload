@@ -18,6 +18,7 @@ import signal, sys, requests, getpass, compress, logger
 SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'rm']
 NEED_INPUT_STRING = ['push', 'pull', 'create', 'rm']
 URL = 'http://localhost:3000'
+SPACING = ' ' * 2
 
 STDOUT = False
 QUIET = False  ### QUIET DOESNT WORK NOW
@@ -116,34 +117,38 @@ def push(filenames):
   username, password = obtain_user_info()
   route = '/upload'
   data = { 'username': username, 'password': password }
+  
   for name in filenames:
-    logger.log('Uploading: ' + name + '.... ')
+    logger.log('Uploading', name + '.... ')
     p = get_full_path(name)
     
     if path.isdir(p):
+      #Upload zipfile
       compress.compress(p)
-      f = open(p + '.zip', 'r')
-      files = { 'file': f }
+      files = { 'file':  open(p + '.zip', 'r') }
       data['path'] = path.dirname(p)
       r = requests.post(URL + route, files=files, data=data)  
-      
-      for p, dirnames, filenames in walk(p):
-        for filename in filenames:
-          full_path = path.join(p, filename)
-          f = open(full_path, 'rb')
-          data['path'] = p
-          files = { 'file': f }
-          r = requests.post(URL + route, files=files, data=data)
-          
+      logger.log('Done\n')
+      #individual uploads
+      #depth = 1
+      #for p, dirnames, filenames in walk(p):
+      #  logger.log(SPACING * depth, path.basename(p), '\n')
+      #  
+      #  for filename in filenames:
+      #    logger.log(SPACING * (depth + 1), filename, '\n')
+      #    full_path = path.join(p, filename)
+      #    f = open(full_path, 'rb')
+      #    data['path'] = p
+      #    files = { 'file': f }
+      #    r = requests.post(URL + route, files=files, data=data)
+      #  depth += 1
+      #logger.log('\n')
     else:
       f = open(p, 'r')
       data['path'] = p
       files = { 'file': f }
       r = requests.post(URL + route, files=files, data=data)
-    logger.log('Upload Complete\n')
-    
-    logger.log('\nDONE\n')
-
+      logger.log('Done\n')
 
 def pull(filenames):
   

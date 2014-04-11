@@ -13,37 +13,16 @@
 
 from optparse import OptionParser, OptionGroup
 from os import path, walk
-import signal, sys, requests, getpass
+import signal, sys, requests, getpass, compress, logger
 
-SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'del']
-NEED_INPUT_STRING = ['push', 'pull', 'create', 'del']
+SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'rm']
+NEED_INPUT_STRING = ['push', 'pull', 'create', 'rm']
 URL = 'http://localhost:3000'
 
 STDOUT = False
-QUIET = False
+QUIET = False  ### QUIET DOESNT WORK NOW
 RECURSE = False
 DPATH = '.'
-
-######################################
-def log(statement):
-  if not QUIET:
-    sys.stdout.write(statement)
-    sys.stdout.flush()
-
-def die(statement):
-  sys.stderr.write('ERROR: ' + statement + '\n')
-  sys.exit(1)
-
-def end(statement):
-  log(statement + '\n')
-  sys.exit(0)
-
-def get_full_path(name):
-  return path.join(path.abspath(path.expanduser(DPATH)), name)
-  
-######################################
-
-
 
 ######################################
 def build_option_parser():
@@ -82,42 +61,39 @@ def build_option_parser():
   parser.add_option_group(pull_group)
 
   return parser
+
+def get_full_path(name):
+  return path.join(path.abspath(path.expanduser(DPATH)), name)
 ######################################
 
 
 
 ######################################
 def obtain_user_info():
-  # Check if authentication file exists
   p = path.expanduser('~/.one')
   if path.isfile(p):
-    username = ''
-    password = ''
     with open(p, 'r') as auth_file:
-      auth_file = open(p, 'r')
       username = auth_file.readline().strip()
-      password = auth_file.readline()
+      password = auth_file.readline().strip()
     return username, password
   else:
-    die('Run "one init" to sign into user')
+    logger.die('Run "one init" to sign into user')
     
 def initialize():
   # create new user
   username = raw_input('If you have an account already, input your username: ')
   password = getpass.getpass('Input your password (note that no text will appear on screen): ')
-  
-  # Create authentication file
   p = path.expanduser('~/.one')
   with open(p, 'w') as auth_file:
-    auth_file.write(username + '\n' + password)
-  log('Consider yourself: Signed In')
+    auth_file.write(username + '\n' + password + '\nzip')
+  logger.log('Consider yourself: Signed In')
   sys.exit(0)
   
 def create_user(username, password):
   route = '/initialize'
   data = { 'username': username, 'password': password } 
   r = requests.post(URL + route, data=data)
-  end(r.text)
+  logger.end(r.text)
 ######################################
 
 
@@ -128,46 +104,46 @@ def list_files():
   route = '/list-files/' + username
   r = requests.get(URL + route)
   if r.text:
-    end(r.text)
+    logger.end(r.text)
   else: 
-    end('No Stored Files')
+    logger.end('No Stored Files')
 ######################################
 
 
 
 ######################################
 def push(filenames): 
-  # Get auth
   username, password = obtain_user_info()
   route = '/upload'
   data = { 'username': username, 'password': password }
-  
-  def recursive_upload(p):
-    log('\n\nPATH: ' + p + '\n\n')
+  for name in filenames:
+    logger.log('Uploading: ' + name + '.... ')
+    p = get_full_path(name)
+    
     if path.isdir(p):
-      p, dirnames, filenames = next(walk(p))
+      compress.compress(p)
+      f = open(p + '.zip', 'r')
+      files = { 'file': f }
+      data['path'] = path.dirname(p)
+      r = requests.post(URL + route, files=files, data=data)  
+      
+      for p, dirnames, filenames in walk(p):
+        for filename in filenames:
+          full_path = path.join(p, filename)
+          f = open(full_path, 'rb')
+          data['path'] = p
+          files = { 'file': f }
+          r = requests.post(URL + route, files=files, data=data)
+          
     else:
-      dirnames = []
-      filenames = [p]
-    for directory in dirnames:
-      recursive_upload(path.join(p, directory))
-    for filename in filenames:
-      full_path = path.join(p, filename)
-      f = open(full_path, 'r')
-      
-      data['path'] = full_path[:full_path.rfind('/')]
-      log('PATH: ' + data['path'])
-      
+      f = open(p, 'r')
+      data['path'] = p
       files = { 'file': f }
       r = requests.post(URL + route, files=files, data=data)
-    log('Upload Complete\n')
+    logger.log('Upload Complete\n')
     
-  for name in filenames:
-    log('Uploading File: ' + name + '.... ')
-    full_path = get_full_path(name)
-    recursive_upload(full_path)
-    log('\nDONE\n')
-  
+    logger.log('\nDONE\n')
+
 
 def pull(filenames):
   
@@ -176,18 +152,18 @@ def pull(filenames):
   
   # Download Files
   for name in filenames:
-    log('Downloading file: ' + filename + '..... ')
-    route = '/'.join(['/download', username, filename])
+    logger.log('Downloading file: ' + name + '..... ')
+    route = '/'.join(['/download', username, name])
     file = requests.get(URL + route).text
     
     if STDOUT:
       log(file + '/n')
     else: 
-      full_path = get_full_path(filename)
-      log('FULL PATH: ' + full_path)
+      full_path = get_full_path(name)
+      logger.log('FULL PATH: ' + full_path)
       with open(full_path, 'wb') as f:
         f.write(file)
-      log('Download Complete\n')
+      logger.log('Download Complete\n')
 ######################################
 
 
@@ -201,7 +177,7 @@ def delete(filenames):
   for filename in filenames:
     data['filename'] = filename
     r = requests.post(URL + route, data=data);
-    log('File: ' + filename + ' deleted\n')
+    logger.log('File: ' + filename + ' deleted\n')
     
 ######################################
 
@@ -214,11 +190,11 @@ def main():
   (options, args) = build_option_parser().parse_args()
 
   if len(args) == 0:
-    die('No sub-command chosen')
+    logger.die('No sub-command chosen')
   elif len(args) == 1 and args[0] in NEED_INPUT_STRING:
-    die('No file selected. Must select at least one file')
+    logger.die('No file selected. Must select at least one file')
   elif args[0] not in SUB_COMMANDS:
-    die('Invalid sub-command chosen - ' + args[0])
+    logger.die('Invalid sub-command chosen - ' + args[0])
   
   
   sub_command = args[0]
@@ -238,7 +214,7 @@ def main():
     list_files()
   elif sub_command == 'create':
     create_user(files[0], files[1])
-  elif sub_command == 'del':
+  elif sub_command == 'rm':
     delete(files)
   
 

@@ -1,7 +1,9 @@
+import sys
+
 def log(statement):
-  if not QUIET:
-    sys.stdout.write(statement)
-    sys.stdout.flush()
+  ##if not QUIET:
+  sys.stdout.write(statement)
+  sys.stdout.flush()
 
 def die(statement):
   sys.stderr.write('ERROR: ' + statement + '\n')

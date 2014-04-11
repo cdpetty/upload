@@ -35,14 +35,16 @@ module.exports = function(req, res){
   
   //Check for required username and password
   if (req.body.username && req.body.password){
-    
+    console.log('1');
     //check for file to be uploaded
     if (req.files.file && req.body.path){
-      
+      console.log('2');
+      console.log('USername:', req.body.username, 'password:', req.body.password, 'a')
       //Check if the user exists
       db_util.doesUserExist(req.body.username, req.body.password, true, function(err, user){
-        if (err) res.send(err);
+        if (err) console.log(err);
         else if (user){
+          console.log('2');
           console.log(user);
           //Check if the file already exists
           db_util.doesFileExist(req.files.file.name, user._id, function(err, exists){
@@ -57,15 +59,15 @@ module.exports = function(req, res){
             });
           });
         }
-        else res.send('User does not exist');
+        else console.log('User does not exist');
       });
     }
     else{
-      res.send('No file provided');
+      console.log('No file provided');
     }
   }
   else{
-    res.send('Incorrect username or password');
+    console.log('Incorrect username or password');
   }
 };
 

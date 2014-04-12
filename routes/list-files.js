@@ -31,21 +31,21 @@ module.exports = function(req, res){
           
           var list = '';
           if (files.length !== 0){
-            list = 'Files:\n';
+            list = '  Files:\n';
             files.forEach(function(one){
-              list += '  ' + one + '\n';
+              list += '    ' + one + '\n';
             });
             list += '\n';
           }
           if (dirs.length !== 0){
-            list += 'Directories:\n';
+            list += '  Directories:\n';
             dirs.forEach(function(one){
-              list += '  ' + one.split('.')[0] + '\n'
+              list += '    ' + one.split('.')[0] + '\n'
             });
           }
           
           //send information
-          res.send(list.substring(0, list.length - 1));
+          res.send(list);
         }
       });
     }

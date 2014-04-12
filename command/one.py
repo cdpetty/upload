@@ -105,9 +105,9 @@ def list_files():
   route = '/list-files/' + username
   r = requests.get(URL + route)
   if r.text:
-    logger.end(r.text)
+    logger.log('One contains the following:\n' + r.text)
   else: 
-    logger.end('No Stored Files')
+    logger.log('No Stored Files')
 ######################################
 
 

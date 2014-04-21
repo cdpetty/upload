@@ -8,41 +8,34 @@ module.exports = function(req, res){
   
   //Find the user
   users.findOne({ username: req.params.username }, function(err, user){
-    console.log('Found user:', user);
     if (err) res.send(err);
     else{
       
       //Retreive the user _id and query the storage database for the owned files
-      console.log('ID:', user._id);
-      storage.find({ user: user._id }, function(err, found){
-        console.log(found);
-        if (err) res.send(err);
+      var query = { user: user._id };
+      if (req.query.path){
+        var path = req.query.path.split('/');
+        query.path = { $all: path };
+        var path_length = path.length;
+      }
+      else
+        var path_length = 0;
+      
+      storage.find(query, function(err, found){
+        if (err) console.error(err);
         else{
           
           //Compile the list of files
-          var dirs = [];
           var files = [];
-          found.forEach(function(f){
-            if (f.dir)
-              dirs.push(f.filename);
-            else
-              files.push(f.filename);
-          });
-          
-          var list = '';
-          if (files.length !== 0){
-            list = '  Files:\n';
-            files.forEach(function(one){
-              list += '    ' + one + '\n';
-            });
-            list += '\n';
+          var dirs = [];
+          for(var x = 0; x < found.length; x++){
+            if (found[x].path.length === path_length)
+              files.push(found[x].filename)
+            else 
+              dirs.push(found[x].path[path_length]);
           }
-          if (dirs.length !== 0){
-            list += '  Directories:\n';
-            dirs.forEach(function(one){
-              list += '    ' + one.split('.')[0] + '\n'
-            });
-          }
+          console.log(files);
+          console.log(dirs);
           
           //send information
           res.send(list);

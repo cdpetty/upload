@@ -12,9 +12,8 @@ var newUserFile = function(file, username, _id, file_path, callback){
   new_file.filename = file.name;
   new_file.date = new Date(); 
   new_file.user = _id;
-  new_file.path = file_path.split('/').filter(function(n){return n!=''});
-  var extension = file.name.split('.')[1];
-  new_file.dir = (extension === 'zip' || extension === 'tar') ? true : false;
+  if (file_path)
+    new_file.path = file_path.split('/').filter(function(n){return n!=''});
   
   //Save and store the file
   var resolved_path = path.resolve('storage', username);
@@ -39,7 +38,7 @@ module.exports = function(req, res){
   if (req.body.username && req.body.password){
     console.log('1');
     //check for file to be uploaded
-    if (req.files.file && req.body.path){
+    if (req.files.file){
       console.log('2');
       console.log('USername:', req.body.username, 'password:', req.body.password, 'a')
       //Check if the user exists
@@ -65,7 +64,7 @@ module.exports = function(req, res){
       });
     }
     else{
-      console.log('No file provided');
+      console.log('No file or path provided');
     }
   }
   else{

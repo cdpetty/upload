@@ -65,6 +65,9 @@ def build_option_parser():
 
 def get_full_path(name):
   return path.join(path.abspath(path.expanduser(DPATH)), name)
+
+def get_relative_path(full_path, base_path):
+  return '/'.join(full_path[len(base_path)-1:])
 ######################################
 
 
@@ -100,14 +103,15 @@ def create_user(username, password):
 
 
 ######################################
-def list_files():
+def list_files(path):
   username = obtain_user_info()[0]
   route = '/list-files/' + username
-  r = requests.get(URL + route)
+  data = {'path': path}
+  r = requests.get(URL + route, params=data)
   if r.text:
     logger.log('One contains the following:\n' + r.text)
   else: 
-    logger.log('No Stored Files')
+    logger.log('No Stored Files\n')
 ######################################
 
 
@@ -123,29 +127,23 @@ def push(filenames):
     p = get_full_path(name)
     
     if path.isdir(p):
-      #Upload zipfile
-      compress.compress(p)
-      files = { 'file':  open(p + '.zip', 'r') }
-      data['path'] = path.dirname(p)
-      r = requests.post(URL + route, files=files, data=data)  
-      logger.log('Done\n')
-      #individual uploads
-      #depth = 1
-      #for p, dirnames, filenames in walk(p):
-      #  logger.log(SPACING * depth, path.basename(p), '\n')
-      #  
-      #  for filename in filenames:
-      #    logger.log(SPACING * (depth + 1), filename, '\n')
-      #    full_path = path.join(p, filename)
-      #    f = open(full_path, 'rb')
-      #    data['path'] = p
-      #    files = { 'file': f }
-      #    r = requests.post(URL + route, files=files, data=data)
-      #  depth += 1
-      #logger.log('\n')
+      depth = 1
+      for folder_path, dirnames, filenames in walk(p):
+        logger.log('1')
+        logger.log(SPACING * depth, path.basename(folder_path), '\n')
+        
+        for filename in filenames:
+          logger.log(SPACING * (depth + 1), filename, '\n')
+          full_path = path.join(folder_path, filename)
+          f = open(full_path, 'rb')
+          data['path'] = get_relative_path(folder_path.split('/'), p.split('/'))
+          files = { 'file': f }
+          r = requests.post(URL + route, files=files, data=data)
+          #r.close()
+        depth += 1
+      logger.log('\n')
     else:
       f = open(p, 'r')
-      data['path'] = p
       files = { 'file': f }
       r = requests.post(URL + route, files=files, data=data)
       logger.log('Done\n')
@@ -165,7 +163,6 @@ def pull(filenames):
       log(file + '/n')
     else: 
       full_path = get_full_path(name)
-      logger.log('FULL PATH: ' + full_path)
       with open(full_path, 'wb') as f:
         f.write(file)
       logger.log('Download Complete\n')
@@ -200,6 +197,8 @@ def main():
     logger.die('No file selected. Must select at least one file')
   elif args[0] not in SUB_COMMANDS:
     logger.die('Invalid sub-command chosen - ' + args[0])
+  elif args[0] == 'list' and len(args) == 1:
+    args.append('')
   
   
   sub_command = args[0]
@@ -216,7 +215,7 @@ def main():
   elif sub_command == 'init':
     initialize()
   elif sub_command == 'list':
-    list_files()
+    list_files(files[0])
   elif sub_command == 'create':
     create_user(files[0], files[1])
   elif sub_command == 'rm':

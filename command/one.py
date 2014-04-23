@@ -143,7 +143,7 @@ def push(filenames):
         depth += 1
       logger.log('\n')
     else:
-      f = open(p, 'r')
+      f = open(p, 'r')  
       files = { 'file': f }
       r = requests.post(URL + route, files=files, data=data)
       logger.log('Done\n')
@@ -180,7 +180,6 @@ def delete(filenames):
     data['filename'] = filename
     r = requests.post(URL + route, data=data);
     logger.log('File: ' + filename + ' deleted\n')
-    
 ######################################
 
 

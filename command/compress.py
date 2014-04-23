@@ -2,7 +2,7 @@ import zipfile, gzip, logger
 from os import path, walk
 
 
-def compress(p):
+def compress_folder(p):
   auth_p = path.expanduser('~/.one')
   if path.isfile(auth_p):
     with open(auth_p, 'r') as auth_file:

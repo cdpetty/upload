@@ -30,12 +30,26 @@ module.exports = function(req, res){
           var dirs = [];
           for(var x = 0; x < found.length; x++){
             if (found[x].path.length === path_length)
-              files.push(found[x].filename)
+              files.push(found[x].filename);
             else 
               dirs.push(found[x].path[path_length]);
           }
-          console.log(files);
-          console.log(dirs);
+          var spacing = '  ';
+          var list = '';
+          if (files.length > 0){
+            list = spacing + 'Files:\n';
+            files.forEach(function(each){
+              list += spacing + spacing + each + '\n';
+            });
+            list += '\n';
+          }
+          if (dirs.length > 0){
+            list += spacing + 'Directories:\n';
+            dirs.forEach(function(each){
+              list += spacing + spacing + each + '\n';
+            });
+            list += '\n'
+          }
           
           //send information
           res.send(list);

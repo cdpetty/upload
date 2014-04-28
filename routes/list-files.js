@@ -31,7 +31,7 @@ module.exports = function(req, res){
           for(var x = 0; x < found.length; x++){
             if (found[x].path.length === path_length)
               files.push(found[x].filename);
-            else 
+            else if (dirs.indexOf(found[x].path[path_length]) === -1)
               dirs.push(found[x].path[path_length]);
           }
           var spacing = '  ';

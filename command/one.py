@@ -47,9 +47,9 @@ def build_option_parser():
   parser.add_option('-q', '--quiet',
                     action='store_true', dest='quiet',
                     help='Limit ouput to stdout') 
-  push_group.add_option('-r', '--recurse',
+  pull_group.add_option('-r', '--recurse',
                     action='store_true', dest='recurse',
-                    help='recuse into directory and push all files') 
+                    help='recuse into directory and pull all files') 
   pull_group.add_option('-d', '--download-path', 
                     action='store', type='string', dest='dpath',
                     help='Specify the folder to place file in')
@@ -129,7 +129,6 @@ def push(filenames):
     if path.isdir(p):
       depth = 1
       for folder_path, dirnames, filenames in walk(p):
-        logger.log('1')
         logger.log(SPACING * depth, path.basename(folder_path), '\n')
         
         for filename in filenames:
@@ -156,11 +155,14 @@ def pull(filenames):
   # Download Files
   for name in filenames:
     logger.log('Downloading file: ' + name + '..... ')
-    route = '/'.join(['/download', username, name])
-    file = requests.get(URL + route).text
-    
+    route = '/'.join(['/download', username])
+    params = {'directory': 'false', 'filename': name}
+    if RECURSE or name[-1] == '/':
+      params['directory'] = 'true'
+      folder = requests.get(URL + route, params=params).text
+      
     if STDOUT:
-      log(file + '/n')
+      logger.log(file + '\n')
     else: 
       full_path = get_full_path(name)
       with open(full_path, 'wb') as f:

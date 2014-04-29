@@ -18,3 +18,13 @@ module.exports.doesUserExist = function(username, password, useAuth, callback){
   else
     users.findOne({ username: username }, callback);
 };
+
+module.exports.doesDirectoryExist = function(folder_path, _id, callback){  
+  console.log('THIS IS THE FOLDER PATH:', folder_path);
+  storage.findOne({ path: {$all: folder_path}, user: _id}, function(err, found){
+    console.log('Founding:', found);
+    if (err) callback(err);
+    else if (found) callback(null, true);
+    else callback(null, false);
+  })
+};

@@ -33,7 +33,7 @@ mongoose.connect('mongodb://localhost/One');
 
 //Routes
 app.post('/upload', routes.upload);
-app.get('/download/:username/:filename', routes.download);
+app.get('/download/:username', routes.download);
 app.post('/initialize', routes.initialize);
 app.get('/list-files/:username', routes.list_files);
 app.post('/delete', routes.delete);

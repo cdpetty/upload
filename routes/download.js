@@ -3,7 +3,8 @@
 var path = require('path'),
     storage = require('../models/storage'),
     db_util = require('../modules/db_util'),
-    targz = require('tar.gz');
+    admZip = require('adm-zip'),
+    zip = new admZip();
 
 //Route
 module.exports = function(req, res){
@@ -18,15 +19,22 @@ module.exports = function(req, res){
 
           if (err) console.err(err);
           else if (exists) {
-            var path_to_folder = path.resolve('../storage/', req.params.username, req.query.filename);
-            var path_to_targz = path.resolve('../temp', req.params.username + '_' + req.query.filename + '.tar.gz');
-            var compress = new targz().compress(path_to_folder, path_to_targz, function(err){
-                if(err) console.log(err);
-                else{
-                  res.download(path_to_targz);
-                  console.log('The compression has ended!');
-                }
+            storage.find({path : {$all : folder_path }}, function(err, found){
+              if (err) console.err(err);
+              else{
+                found.forEach(function(one){
+                  //console.log('REQ.PARAMS.USERNAME:', req.params.username, 'FOUND.FILENAME:', one.filename, found);
+                  zip.addLocalFile(path.resolve(__dirname, '../storage', req.params.username, one.filename));
+                });
+                var path_to_zip = path.join('/tmp', folder_path[folder_path.length - 1]);
+                zip.writeZip(path_to_zip);
+                res.download(path_to_zip);
+              }
             });
+            //var path_to_folder = path.resolve('../storage/', req.params.username, req.query.filename);
+            //var path_to_targz = path.resolve('../temp', req.params.username + '_' + req.query.filename + '.tar.gz');
+            
+            
           }
           else res.send('No folder of this exist');
           });

@@ -13,7 +13,8 @@
 
 from optparse import OptionParser, OptionGroup
 from os import path, walk
-import signal, sys, requests, getpass, compress, logger
+from StringIO import StringIO
+import signal, sys, requests, getpass, compress, logger, zipfile
 
 SUB_COMMANDS = ['push', 'pull', 'list', 'init', 'create', 'rm']
 NEED_INPUT_STRING = ['push', 'pull', 'create', 'rm']
@@ -160,14 +161,22 @@ def pull(filenames):
     if RECURSE or name[-1] == '/':
       params['directory'] = 'true'
       folder = requests.get(URL + route, params=params).text
+      #with zipfile.ZipFile(name.strip('/') + '.zip', 'w') as zipped_file:
+      #  zipped_file.writestr('testing', StringIO(folder))
+      io = StringIO(folder)
+      a = zipfile.ZipFile(io, 'r')
+      a.close()
+      #a.writestr('asdf',io)
+      #a.close()
       
-    if STDOUT:
-      logger.log(file + '\n')
-    else: 
-      full_path = get_full_path(name)
-      with open(full_path, 'wb') as f:
-        f.write(file)
-      logger.log('Download Complete\n')
+      logger.log('Here on the folder downloading!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+      #zipped_file = open(name.strip('/') + '.zip', 'wb')
+      #zipped_file.write(StringIO(folder))
+    #else: 
+    #  full_path = get_full_path(name)
+    #  with open(full_path, 'wb') as f:
+    #    f.write(file)
+    #  logger.log('Download Complete\n')
 ######################################
 
 

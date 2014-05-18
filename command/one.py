@@ -65,6 +65,13 @@ def build_option_parser():
   return parser
 
 def get_full_path(name):
+  #start = path.expanduser(DPATH)
+  #logger.log('Start:', start, '\n')
+  #starting = path.abspath(start)
+  #logger.log('Starting:', starting, '\n')
+  #end = path.join(starting, name)
+  #logger.log('End:', end, '\n')
+  #return end
   return path.join(path.abspath(path.expanduser(DPATH)), name)
 
 def get_relative_path(full_path, base_path):
@@ -124,7 +131,7 @@ def push(filenames):
   data = { 'username': username, 'password': password }
   
   for name in filenames:
-    logger.log('Uploading', name + '.... ')
+    logger.log('Uploading', name + '.... \n')
     p = get_full_path(name)
     
     if path.isdir(p):
@@ -155,28 +162,24 @@ def pull(filenames):
   
   # Download Files
   for name in filenames:
-    logger.log('Downloading file: ' + name + '..... ')
+    logger.log('Downloading file: ' + name + '..... \n')
     route = '/'.join(['/download', username])
-    params = {'directory': 'false', 'filename': name}
+    params = {'directory': 'f', 'filename': name}
+    write_name = name
+    
     if RECURSE or name[-1] == '/':
-      params['directory'] = 'true'
-      folder = requests.get(URL + route, params=params).text
-      #with zipfile.ZipFile(name.strip('/') + '.zip', 'w') as zipped_file:
-      #  zipped_file.writestr('testing', StringIO(folder))
-      io = StringIO(folder)
-      a = zipfile.ZipFile(io, 'r')
-      a.close()
-      #a.writestr('asdf',io)
-      #a.close()
+      params['directory'] = 't'
+      write_name = write_name.strip('/') + '.zip'
       
-      logger.log('Here on the folder downloading!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-      #zipped_file = open(name.strip('/') + '.zip', 'wb')
-      #zipped_file.write(StringIO(folder))
-    #else: 
-    #  full_path = get_full_path(name)
-    #  with open(full_path, 'wb') as f:
-    #    f.write(file)
-    #  logger.log('Download Complete\n')
+    content = requests.get(URL + route, params=params, stream=True)
+    full_path = get_full_path(write_name)
+    with open(full_path, 'wb') as handle:
+      for block in content.iter_content(1024):
+        if not block:
+          break
+        handle.write(block)
+      
+    logger.log('Download Complete\n')
 ######################################
 
 

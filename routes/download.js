@@ -13,7 +13,8 @@ module.exports = function(req, res){
     db_util.doesUserExist(req.params.username, '', false, function(err, user){
       if (err) res.send(err);
       else if (user){
-        if (req.query.directory){
+        console.log('Req.query.directory:', req.query.directory);
+        if (req.query.directory === 't'){
           var folder_path = req.query.filename.split('/').filter(function(n){return n!=''});
           db_util.doesDirectoryExist(folder_path, user._id, function(err, exists){
 
